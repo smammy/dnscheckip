@@ -171,9 +171,8 @@ class DNSCheckIPHandler(socketserver.BaseRequestHandler):
         msg_buf = self.request[0]
         msg_hex = codecs.encode(msg_buf, 'hex')
         msg_io = BytesIO(msg_buf)
-        print(f'{now} {client[0]} {client[1]} {msg_hex}')
+        print(client[0], client[1], msg_buf.hex())
         msg = parse_msg(msg_io)
-        print(f'• msg={msg}')
         if msg.header.qr or msg.header.opcode != 0:
             resp = not_impl_resp(msg)
         elif msg.header.tc:
@@ -188,7 +187,6 @@ class DNSCheckIPHandler(socketserver.BaseRequestHandler):
             resp = refused_resp(msg)
         else:
             resp = client_ip_resp(msg, client)
-        print(f'• resp={resp}')
         resp_buf = b''
         resp_buf += writebits('u16 b1u4b1b1b1b1 u3u4 u16 u16 u16 u16',
                               resp.header)
@@ -199,7 +197,6 @@ class DNSCheckIPHandler(socketserver.BaseRequestHandler):
                                    resp.answers[0].class_,  resp.answers[0].ttl,
                                    resp.answers[0].rdlength, *resp.answers[0].rdata))
         resp_hex = codecs.encode(resp_buf, 'hex')
-        print(f'• resp_hex={resp_hex}')
         self.request[1].sendto(resp_buf, client)
 
 if __name__ == '__main__':
